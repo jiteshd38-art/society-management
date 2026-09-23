@@ -1,0 +1,6 @@
+{
+  "name": "Palm Heights Smart Society Management",
+  "description": "Comprehensive residential society management portal for gated security access, maintenance billing, complaints helpdesk, amenities booking, and community democracy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

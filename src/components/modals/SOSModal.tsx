@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useSociety } from '../../context/SocietyContext';
 import { EmergencySOS } from '../../types/society';
 import { X, Siren, Flame, HeartPulse, ShieldAlert, Disc3, PhoneCall, CheckCircle } from 'lucide-react';
-import { INITIAL_EMERGENCY_CONTACTS } from '../../data/mockData';
 
 interface SOSModalProps {
   isOpen: boolean;
@@ -10,7 +9,7 @@ interface SOSModalProps {
 }
 
 export const SOSModal: React.FC<SOSModalProps> = ({ isOpen, onClose }) => {
-  const { currentResident, currentRole, triggerSOS, sosAlerts, resolveSOS } = useSociety();
+  const { currentResident, currentRole, triggerSOS, sosAlerts, resolveSOS, emergencyContacts } = useSociety();
   const [selectedType, setSelectedType] = useState<EmergencySOS['type']>('medical');
   const [notes, setNotes] = useState('');
   const [triggered, setTriggered] = useState(false);
@@ -186,8 +185,8 @@ export const SOSModal: React.FC<SOSModalProps> = ({ isOpen, onClose }) => {
               Direct Emergency Quick Dials:
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              {INITIAL_EMERGENCY_CONTACTS.slice(0, 4).map((c, idx) => (
-                <div key={idx} className="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+              {emergencyContacts.slice(0, 4).map((c, idx) => (
+                <div key={c.id || idx} className="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
                   <div className="min-w-0 pr-1">
                     <p className="font-semibold text-slate-800 truncate">{c.label}</p>
                     <p className="text-[10px] text-emerald-700 font-mono font-semibold">IC: {c.intercom}</p>

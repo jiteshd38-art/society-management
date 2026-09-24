@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useSociety } from '../../context/SocietyContext';
-import { INITIAL_EMERGENCY_CONTACTS } from '../../data/mockData';
 import {
   Building2,
   Users,
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const SocietyDirectory: React.FC = () => {
-  const { flats } = useSociety();
+  const { flats, emergencyContacts } = useSociety();
   const [selectedBlock, setSelectedBlock] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'flats' | 'committee' | 'emergency'>('flats');
@@ -193,26 +192,32 @@ export const SocietyDirectory: React.FC = () => {
 
       {activeTab === 'emergency' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {INITIAL_EMERGENCY_CONTACTS.map((ec, idx) => (
-            <div key={idx} className="p-5 bg-white border border-red-200 rounded-2xl flex items-center justify-between gap-4 shadow-2xs">
-              <div>
-                <span className="px-2 py-0.5 rounded-sm bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase">
-                  {ec.available}
-                </span>
-                <h4 className="font-bold text-slate-900 text-sm mt-1.5">{ec.label}</h4>
-                <p className="text-xs text-slate-500 font-mono mt-0.5">
-                  Intercom: <span className="text-emerald-700 font-bold">{ec.intercom}</span>
-                </p>
-              </div>
-
-              <a
-                href={`tel:${ec.phone}`}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 transition-colors"
-              >
-                <PhoneCall className="w-4 h-4" /> Dial Now
-              </a>
+          {emergencyContacts.length === 0 ? (
+            <div className="col-span-2 text-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-200">
+              No emergency contacts recorded in database.
             </div>
-          ))}
+          ) : (
+            emergencyContacts.map((ec, idx) => (
+              <div key={ec.id || idx} className="p-5 bg-white border border-red-200 rounded-2xl flex items-center justify-between gap-4 shadow-2xs">
+                <div>
+                  <span className="px-2 py-0.5 rounded-sm bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase">
+                    {ec.available}
+                  </span>
+                  <h4 className="font-bold text-slate-900 text-sm mt-1.5">{ec.label}</h4>
+                  <p className="text-xs text-slate-500 font-mono mt-0.5">
+                    Intercom: <span className="text-emerald-700 font-bold">{ec.intercom}</span>
+                  </p>
+                </div>
+
+                <a
+                  href={`tel:${ec.phone}`}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 transition-colors"
+                >
+                  <PhoneCall className="w-4 h-4" /> Dial Now
+                </a>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>

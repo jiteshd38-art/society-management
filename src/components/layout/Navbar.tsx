@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSociety } from '../../context/SocietyContext';
 import { useGoogleAuth } from '../../context/GoogleAuthContext';
 import { GoogleSignInButton } from '../common/GoogleSignInButton';
+import { DatabaseConfigModal } from '../common/DatabaseConfigModal';
 import { UserRole } from '../../types/society';
 import {
   Building2,
@@ -16,7 +17,8 @@ import {
   Car,
   User,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Database
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -33,7 +35,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSOS }) => {
     visitors,
     notices,
     sosAlerts,
-    resetToDemoData
+    resetToDemoData,
+    dbError,
+    isConfigured
   } = useSociety();
 
   const { user, isConnected, logout } = useGoogleAuth();
@@ -41,6 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSOS }) => {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showFlatMenu, setShowFlatMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showDbModal, setShowDbModal] = useState(false);
 
   const activeSOS = sosAlerts.filter(s => s.status === 'active');
   const recentVisitors = visitors.slice(0, 3);
@@ -264,6 +269,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSOS }) => {
               )}
             </div>
 
+            {/* Supabase Database Connection Button */}
+            <button
+              onClick={() => setShowDbModal(true)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all shadow-xs ${
+                !isConfigured
+                  ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                  : dbError
+                  ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'
+              }`}
+              title="Supabase Database Status & Configuration"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Supabase</span>
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  !isConfigured
+                    ? 'bg-slate-400'
+                    : dbError
+                    ? 'bg-amber-500 animate-pulse'
+                    : 'bg-emerald-500'
+                }`}
+              />
+            </button>
+
             {/* Reset to Demo Data button */}
             <button
               onClick={() => {
@@ -279,6 +309,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSOS }) => {
           </div>
         </div>
       </div>
+
+      <DatabaseConfigModal isOpen={showDbModal} onClose={() => setShowDbModal(false)} />
     </header>
   );
 };

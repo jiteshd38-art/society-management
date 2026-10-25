@@ -17,16 +17,23 @@ import { EmergencyContact } from './types';
 
 export const INITIAL_FLATS: FlatRecord[] = [
   { flatNumber: 'A-101', block: 'Tower A', floor: 1, ownerName: 'Ramesh Patel', occupantType: 'Owner', contact: '+91 98111 22334', intercom: '1101', membersCount: 4, maintenanceDue: 0 },
+  { flatNumber: 'A-102', block: 'Tower A', floor: 1, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '1102', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'A-201', block: 'Tower A', floor: 2, ownerName: 'Meera Nambiar', occupantType: 'Tenant', contact: '+91 98222 33445', intercom: '1201', membersCount: 2, maintenanceDue: 3500 },
+  { flatNumber: 'A-301', block: 'Tower A', floor: 3, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '1301', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'A-302', block: 'Tower A', floor: 3, ownerName: 'Anand Kulkarni', occupantType: 'Owner', contact: '+91 98333 44556', intercom: '1302', membersCount: 3, maintenanceDue: 0 },
   { flatNumber: 'A-402', block: 'Tower A', floor: 4, ownerName: 'Aditya Sharma', occupantType: 'Owner', contact: '+91 98201 44521', intercom: '1402', membersCount: 3, maintenanceDue: 4200 },
   { flatNumber: 'A-501', block: 'Tower A', floor: 5, ownerName: 'Farhan Zaidi', occupantType: 'Owner', contact: '+91 98444 55667', intercom: '1501', membersCount: 4, maintenanceDue: 0 },
+  { flatNumber: 'B-103', block: 'Tower B', floor: 1, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '2103', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'B-204', block: 'Tower B', floor: 2, ownerName: 'Dr. Suresh Sen', occupantType: 'Owner', contact: '+91 98555 66778', intercom: '2204', membersCount: 2, maintenanceDue: 0 },
+  { flatNumber: 'B-303', block: 'Tower B', floor: 3, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '2303', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'B-502', block: 'Tower B', floor: 5, ownerName: 'Geeta Agarwal', occupantType: 'Tenant', contact: '+91 98666 77889', intercom: '2502', membersCount: 3, maintenanceDue: 7000 },
   { flatNumber: 'B-801', block: 'Tower B', floor: 8, ownerName: 'Priya Mukherjee', occupantType: 'Owner', contact: '+91 98450 11982', intercom: '2801', membersCount: 2, maintenanceDue: 0 },
   { flatNumber: 'C-104', block: 'Tower C', floor: 1, ownerName: 'Vikram Deshmukh', occupantType: 'Owner', contact: '+91 99302 88471', intercom: '3104', membersCount: 5, maintenanceDue: 0 },
+  { flatNumber: 'C-202', block: 'Tower C', floor: 2, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '3202', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'C-303', block: 'Tower C', floor: 3, ownerName: 'Kunal Malhotra', occupantType: 'Owner', contact: '+91 98777 88990', intercom: '3303', membersCount: 3, maintenanceDue: 0 },
+  { flatNumber: 'C-501', block: 'Tower C', floor: 5, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '3501', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'C-602', block: 'Tower C', floor: 6, ownerName: 'Tanvi Joshi', occupantType: 'Tenant', contact: '+91 98888 99001', intercom: '3602', membersCount: 1, maintenanceDue: 1500 },
+  { flatNumber: 'D-102', block: 'Tower D', floor: 1, ownerName: 'Vacant (Unassigned)', occupantType: 'Vacant', contact: '', intercom: '4102', membersCount: 0, maintenanceDue: 0 },
   { flatNumber: 'D-201', block: 'Tower D', floor: 2, ownerName: 'Rajinder Gill', occupantType: 'Owner', contact: '+91 98999 00112', intercom: '4201', membersCount: 4, maintenanceDue: 0 },
   { flatNumber: 'D-404', block: 'Tower D', floor: 4, ownerName: 'Sanjay Reddy', occupantType: 'Owner', contact: '+91 99000 11223', intercom: '4404', membersCount: 4, maintenanceDue: 8400 },
   { flatNumber: 'D-701', block: 'Tower D', floor: 7, ownerName: 'David Christopher', occupantType: 'Owner', contact: '+91 99111 22334', intercom: '4701', membersCount: 2, maintenanceDue: 0 }

@@ -20,7 +20,8 @@ import {
   ChevronRight,
   TrendingUp,
   Sparkles,
-  Mail
+  Mail,
+  UserPlus
 } from 'lucide-react';
 import { MaintenanceBill } from '../../types/society';
 
@@ -70,6 +71,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const totalDuesPending = flats.reduce((acc, f) => acc + f.maintenanceDue, 0);
   const pinnedNotices = notices.filter(n => n.isPinned);
 
+  const totalFlatsCount = flats.length;
+  const vacantFlatsCount = flats.filter(f => f.occupantType === 'Vacant').length;
+  const occupiedFlatsCount = totalFlatsCount - vacantFlatsCount;
+  const occupancyPercent = totalFlatsCount > 0 ? ((occupiedFlatsCount / totalFlatsCount) * 100).toFixed(1) : '100';
+
   const handleVerifyPassCode = (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickCode.trim()) return;
@@ -102,21 +108,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">Palm Heights Residency ERP</h1>
               <p className="text-xs text-slate-600 mt-1 max-w-xl">
-                Unified residential operations: 4 Towers (A, B, C, D) • 184 Flats • Automated Gate Security & Maintenance
+                Unified residential operations: 4 Towers (A, B, C, D) • {totalFlatsCount} Flats ({vacantFlatsCount} Vacant) • Automated Gate Security &amp; Maintenance
               </p>
             </div>
             <div className="flex flex-wrap gap-2.5">
               <button
-                onClick={() => onNavigateTab('gate')}
+                onClick={() => onNavigateTab('directory')}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
               >
-                <ShieldAlert className="w-3.5 h-3.5" /> Gate Operations
+                <UserPlus className="w-3.5 h-3.5" /> Onboard Resident
+              </button>
+              <button
+                onClick={() => onNavigateTab('gate')}
+                className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-emerald-600" /> Gate Operations
               </button>
               <button
                 onClick={() => onNavigateTab('finance')}
                 className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5"
               >
-                <CreditCard className="w-3.5 h-3.5 text-blue-600" /> Accounts & Dues
+                <CreditCard className="w-3.5 h-3.5 text-blue-600" /> Accounts &amp; Dues
               </button>
               <button
                 onClick={() => onNavigateTab('notices')}
@@ -138,12 +150,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-slate-900 font-mono">170</span>
-              <span className="text-xs text-slate-500">/ 184 Units (92.4%)</span>
+              <span className="text-2xl font-bold text-slate-900 font-mono">{occupiedFlatsCount}</span>
+              <span className="text-xs text-slate-500">/ {totalFlatsCount} Units ({occupancyPercent}%)</span>
             </div>
-            <p className="text-[11px] text-emerald-700 font-medium mt-2 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> 14 Vacant / 12 under renovation
-            </p>
+            <button
+              onClick={() => onNavigateTab('directory')}
+              className="text-[11px] text-amber-700 hover:text-amber-800 font-semibold mt-2 flex items-center gap-1 transition-colors"
+            >
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              <span>{vacantFlatsCount} Vacant Units • Onboard Now →</span>
+            </button>
           </div>
 
           <div className="p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs">

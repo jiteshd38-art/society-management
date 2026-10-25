@@ -52,6 +52,8 @@ import { updateStaffMemberStatus } from '../supabase/mutations/staff';
 import { toggleDomesticWorkerStatus } from '../supabase/mutations/domesticWorkers';
 import { createEmergencySOS, resolveEmergencySOS } from '../supabase/mutations/sos';
 import { createEmailLog } from '../supabase/mutations/emailLogs';
+import { assignResidentToFlat, vacateFlat, createFlat } from '../supabase/mutations/flats';
+import { createResidentRecord, removeResidentByFlat } from '../supabase/mutations/residents';
 import { seedSupabaseDatabase } from '../supabase/seed';
 import {
   INITIAL_FLATS,
@@ -191,6 +193,31 @@ interface SocietyContextType {
   triggerSOS: (type: EmergencySOS['type'], flatNumber: string, residentName: string, phone: string, notes?: string) => void;
   resolveSOS: (id: string, responderName: string) => void;
 
+  // Flats & Residents Management
+  assignResidentToVacantUnit: (data: {
+    flatNumber: string;
+    residentName: string;
+    email: string;
+    phone: string;
+    role: 'owner' | 'tenant';
+    membersCount: number;
+    intercom?: string;
+    vehicles?: {
+      type: 'car' | 'bike' | 'ev';
+      model: string;
+      registrationNumber: string;
+      parkingSlot: string;
+    }[];
+    notes?: string;
+  }) => Promise<{ success: boolean; message: string; resident?: ResidentUser }>;
+  markUnitAsVacant: (flatNumber: string) => Promise<{ success: boolean; message: string }>;
+  addNewFlatUnit: (flatData: {
+    flatNumber: string;
+    block: string;
+    floor: number;
+    intercom?: string;
+  }) => Promise<{ success: boolean; message: string }>;
+
   // Reset demo
   resetToDemoData: () => void;
 }
@@ -220,6 +247,19 @@ const loadStored = <T,>(key: string, fallback: T): T => {
   }
 };
 
+const loadStoredFlats = (): FlatRecord[] => {
+  const stored = loadStored<FlatRecord[]>('flats', INITIAL_FLATS);
+  const hasVacant = stored.some(f => f.occupantType === 'Vacant');
+  if (!hasVacant) {
+    const existingNumbers = new Set(stored.map(f => f.flatNumber));
+    const vacantFromInitial = INITIAL_FLATS.filter(
+      f => f.occupantType === 'Vacant' && !existingNumbers.has(f.flatNumber)
+    );
+    return [...stored, ...vacantFromInitial];
+  }
+  return stored;
+};
+
 export const SocietyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentRole, setCurrentRole] = useState<UserRole>('admin');
   const [allResidents, setAllResidents] = useState<ResidentUser[]>(() => loadStored('residents', INITIAL_RESIDENTS));
@@ -228,7 +268,7 @@ export const SocietyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return stored.length > 0 ? stored[0] : defaultResident;
   });
 
-  const [flats, setFlats] = useState<FlatRecord[]>(() => loadStored('flats', INITIAL_FLATS));
+  const [flats, setFlats] = useState<FlatRecord[]>(loadStoredFlats);
   const [visitors, setVisitors] = useState<Visitor[]>(() => loadStored('visitors', INITIAL_VISITORS));
   const [bills, setBills] = useState<MaintenanceBill[]>(() => loadStored('bills', INITIAL_BILLS));
   const [complaints, setComplaints] = useState<Complaint[]>(() => loadStored('complaints', INITIAL_COMPLAINTS));
@@ -1118,6 +1158,192 @@ export const SocietyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addToast('success', 'Emergency Resolved', `Alert cleared by ${responderName}.`);
   };
 
+  // Flats & Residents Management
+  const assignResidentToVacantUnit = async (data: {
+    flatNumber: string;
+    residentName: string;
+    email: string;
+    phone: string;
+    role: 'owner' | 'tenant';
+    membersCount: number;
+    intercom?: string;
+    vehicles?: {
+      type: 'car' | 'bike' | 'ev';
+      model: string;
+      registrationNumber: string;
+      parkingSlot: string;
+    }[];
+    notes?: string;
+  }): Promise<{ success: boolean; message: string; resident?: ResidentUser }> => {
+    try {
+      const targetFlat = flats.find(f => f.flatNumber === data.flatNumber);
+      if (!targetFlat) {
+        addToast('error', 'Flat Not Found', `Unit ${data.flatNumber} does not exist in society records.`);
+        return { success: false, message: 'Flat not found' };
+      }
+
+      const intercomNum = data.intercom || targetFlat.intercom || '1000';
+      const newResidentId = `res-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+
+      const newResident: ResidentUser = {
+        id: newResidentId,
+        name: data.residentName.trim(),
+        email: data.email.trim(),
+        phone: data.phone.trim(),
+        flatNumber: data.flatNumber,
+        block: targetFlat.block,
+        role: data.role,
+        intercom: intercomNum,
+        vehicles: (data.vehicles || []).map((v, i) => ({
+          id: `v-${Date.now()}-${i}`,
+          type: v.type,
+          model: v.model,
+          registrationNumber: v.registrationNumber,
+          parkingSlot: v.parkingSlot
+        })),
+        domesticStaffIds: []
+      };
+
+      // 1. Update Flat record
+      setFlats(prevFlats =>
+        prevFlats.map(f => {
+          if (f.flatNumber === data.flatNumber) {
+            return {
+              ...f,
+              ownerName: data.residentName.trim(),
+              occupantType: data.role === 'owner' ? 'Owner' : 'Tenant',
+              contact: data.phone.trim(),
+              intercom: intercomNum,
+              membersCount: data.membersCount || 1,
+            };
+          }
+          return f;
+        })
+      );
+
+      // 2. Add to residents list
+      setAllResidents(prev => [newResident, ...prev]);
+
+      // 3. Welcome notice broadcast
+      const welcomeNotice: Notice = {
+        id: `notice-welcome-${Date.now()}`,
+        title: `Welcome to Palm Heights: ${data.residentName} (Flat ${data.flatNumber})`,
+        content: `Warm greetings to our new resident ${data.residentName} moving into Flat ${data.flatNumber} (${targetFlat.block}) as ${data.role === 'owner' ? 'Homeowner' : 'Tenant'}. Let's welcome them to our society!`,
+        category: 'general',
+        isPinned: false,
+        publishedDate: new Date().toISOString().split('T')[0],
+        authorName: 'Estate Management Committee',
+        authorRole: 'Admin',
+        targetBlocks: ['All']
+      };
+      setNotices(prev => [welcomeNotice, ...prev]);
+
+      // 4. Supabase persistence if connected
+      if (isSupabaseConfigured) {
+        assignResidentToFlat(data.flatNumber, {
+          residentName: data.residentName.trim(),
+          role: data.role === 'owner' ? 'Owner' : 'Tenant',
+          contact: data.phone.trim(),
+          intercom: intercomNum,
+          membersCount: data.membersCount || 1
+        }).catch(err => console.warn('Supabase assignResidentToFlat error:', err));
+
+        createResidentRecord(newResident).catch(err => console.warn('Supabase createResidentRecord error:', err));
+        createNoticeRecord(welcomeNotice).catch(err => console.warn('Supabase createNoticeRecord error:', err));
+      }
+
+      addToast(
+        'success',
+        'Resident Onboarded Successfully',
+        `${data.residentName} has been assigned to Flat ${data.flatNumber} (${targetFlat.block}). Intercom & directory records updated.`
+      );
+
+      return { success: true, message: 'Resident assigned successfully', resident: newResident };
+    } catch (err: any) {
+      console.error('Failed to assign resident:', err);
+      addToast('error', 'Onboarding Failed', err?.message || 'Could not assign resident.');
+      return { success: false, message: err?.message || 'Failed to assign resident' };
+    }
+  };
+
+  const markUnitAsVacant = async (flatNumber: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const targetFlat = flats.find(f => f.flatNumber === flatNumber);
+      if (!targetFlat) {
+        addToast('error', 'Flat Not Found', `Flat ${flatNumber} not found.`);
+        return { success: false, message: 'Flat not found' };
+      }
+
+      setFlats(prevFlats =>
+        prevFlats.map(f => {
+          if (f.flatNumber === flatNumber) {
+            return {
+              ...f,
+              ownerName: 'Vacant (Unassigned)',
+              occupantType: 'Vacant',
+              contact: '',
+              membersCount: 0
+            };
+          }
+          return f;
+        })
+      );
+
+      // Remove resident records for this flat
+      setAllResidents(prev => prev.filter(r => r.flatNumber !== flatNumber));
+
+      if (isSupabaseConfigured) {
+        vacateFlat(flatNumber).catch(err => console.warn('Supabase vacateFlat error:', err));
+        removeResidentByFlat(flatNumber).catch(err => console.warn('Supabase removeResidentByFlat error:', err));
+      }
+
+      addToast('info', 'Unit Vacated', `Flat ${flatNumber} has been updated to Vacant status.`);
+      return { success: true, message: 'Unit marked as vacant' };
+    } catch (err: any) {
+      addToast('error', 'Error', err?.message || 'Failed to vacate unit');
+      return { success: false, message: err?.message || 'Failed to vacate unit' };
+    }
+  };
+
+  const addNewFlatUnit = async (flatData: {
+    flatNumber: string;
+    block: string;
+    floor: number;
+    intercom?: string;
+  }): Promise<{ success: boolean; message: string }> => {
+    try {
+      const exists = flats.some(f => f.flatNumber.toLowerCase() === flatData.flatNumber.toLowerCase());
+      if (exists) {
+        addToast('warning', 'Unit Already Exists', `Flat ${flatData.flatNumber} is already in the society database.`);
+        return { success: false, message: 'Flat already exists' };
+      }
+
+      const newFlat: FlatRecord = {
+        flatNumber: flatData.flatNumber.toUpperCase(),
+        block: flatData.block,
+        floor: flatData.floor,
+        ownerName: 'Vacant (Unassigned)',
+        occupantType: 'Vacant',
+        contact: '',
+        intercom: flatData.intercom || `${flatData.block.replace('Tower ', '')}${flatData.flatNumber.replace(/[^0-9]/g, '')}`.slice(0, 4) || '1000',
+        membersCount: 0,
+        maintenanceDue: 0
+      };
+
+      setFlats(prev => [...prev, newFlat]);
+
+      if (isSupabaseConfigured) {
+        createFlat(newFlat).catch(err => console.warn('Supabase createFlat error:', err));
+      }
+
+      addToast('success', 'New Unit Created', `Flat ${newFlat.flatNumber} (${newFlat.block}) added as a vacant unit.`);
+      return { success: true, message: 'Flat created successfully' };
+    } catch (err: any) {
+      addToast('error', 'Error', err?.message || 'Failed to add flat');
+      return { success: false, message: err?.message || 'Failed to add flat' };
+    }
+  };
+
   // Reset demo
   const resetToDemoData = async () => {
     try {
@@ -1203,6 +1429,9 @@ export const SocietyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         toggleDomesticWorkerPunch,
         triggerSOS,
         resolveSOS,
+        assignResidentToVacantUnit,
+        markUnitAsVacant,
+        addNewFlatUnit,
         resetToDemoData
       }}
     >

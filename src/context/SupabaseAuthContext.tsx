@@ -26,6 +26,11 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setIsLoading(false);
+      return;
+    }
+
     // Initial session retrieval
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);

@@ -261,50 +261,97 @@ ALTER TABLE bill_email_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emergency_contacts ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access to directory, notices, amenities, flats for authenticated and anonymous users
+DROP POLICY IF EXISTS "Public read flats" ON flats;
 CREATE POLICY "Public read flats" ON flats FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert flats" ON flats;
+CREATE POLICY "Public insert flats" ON flats FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update flats" ON flats;
+CREATE POLICY "Public update flats" ON flats FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Public read residents" ON residents;
 CREATE POLICY "Public read residents" ON residents FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert residents" ON residents;
+CREATE POLICY "Public insert residents" ON residents FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update residents" ON residents;
+CREATE POLICY "Public update residents" ON residents FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public delete residents" ON residents;
+CREATE POLICY "Public delete residents" ON residents FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS "Public read visitors" ON visitors;
 CREATE POLICY "Public read visitors" ON visitors FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert visitors" ON visitors;
 CREATE POLICY "Public insert visitors" ON visitors FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update visitors" ON visitors;
 CREATE POLICY "Public update visitors" ON visitors FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read maintenance_bills" ON maintenance_bills;
 CREATE POLICY "Public read maintenance_bills" ON maintenance_bills FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert maintenance_bills" ON maintenance_bills;
 CREATE POLICY "Public insert maintenance_bills" ON maintenance_bills FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update maintenance_bills" ON maintenance_bills;
 CREATE POLICY "Public update maintenance_bills" ON maintenance_bills FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read complaints" ON complaints;
 CREATE POLICY "Public read complaints" ON complaints FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert complaints" ON complaints;
 CREATE POLICY "Public insert complaints" ON complaints FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update complaints" ON complaints;
 CREATE POLICY "Public update complaints" ON complaints FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read amenities" ON amenities;
 CREATE POLICY "Public read amenities" ON amenities FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read amenity_bookings" ON amenity_bookings;
 CREATE POLICY "Public read amenity_bookings" ON amenity_bookings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert amenity_bookings" ON amenity_bookings;
 CREATE POLICY "Public insert amenity_bookings" ON amenity_bookings FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update amenity_bookings" ON amenity_bookings;
 CREATE POLICY "Public update amenity_bookings" ON amenity_bookings FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read notices" ON notices;
 CREATE POLICY "Public read notices" ON notices FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert notices" ON notices;
 CREATE POLICY "Public insert notices" ON notices FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update notices" ON notices;
 CREATE POLICY "Public update notices" ON notices FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public delete notices" ON notices;
 CREATE POLICY "Public delete notices" ON notices FOR DELETE USING (true);
 
+DROP POLICY IF EXISTS "Public read community_polls" ON community_polls;
 CREATE POLICY "Public read community_polls" ON community_polls FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert community_polls" ON community_polls;
 CREATE POLICY "Public insert community_polls" ON community_polls FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update community_polls" ON community_polls;
 CREATE POLICY "Public update community_polls" ON community_polls FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read staff_members" ON staff_members;
 CREATE POLICY "Public read staff_members" ON staff_members FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public update staff_members" ON staff_members;
 CREATE POLICY "Public update staff_members" ON staff_members FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read domestic_workers" ON domestic_workers;
 CREATE POLICY "Public read domestic_workers" ON domestic_workers FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public update domestic_workers" ON domestic_workers;
 CREATE POLICY "Public update domestic_workers" ON domestic_workers FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read emergency_sos" ON emergency_sos;
 CREATE POLICY "Public read emergency_sos" ON emergency_sos FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert emergency_sos" ON emergency_sos;
 CREATE POLICY "Public insert emergency_sos" ON emergency_sos FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update emergency_sos" ON emergency_sos;
 CREATE POLICY "Public update emergency_sos" ON emergency_sos FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read bill_email_logs" ON bill_email_logs;
 CREATE POLICY "Public read bill_email_logs" ON bill_email_logs FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert bill_email_logs" ON bill_email_logs;
 CREATE POLICY "Public insert bill_email_logs" ON bill_email_logs FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public read emergency_contacts" ON emergency_contacts;
 CREATE POLICY "Public read emergency_contacts" ON emergency_contacts FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read profiles" ON profiles;
 CREATE POLICY "Public read profiles" ON profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public insert profiles" ON profiles;
 CREATE POLICY "Public insert profiles" ON profiles FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public update profiles" ON profiles;
 CREATE POLICY "Public update profiles" ON profiles FOR UPDATE USING (true);
 
 -- ==============================================================================
@@ -314,16 +361,23 @@ CREATE POLICY "Public update profiles" ON profiles FOR UPDATE USING (true);
 -- Seed Flats
 INSERT INTO flats (flat_number, block, floor, owner_name, occupant_type, contact, intercom, members_count, maintenance_due) VALUES
 ('A-101', 'Tower A', 1, 'Ramesh Patel', 'Owner', '+91 98111 22334', '1101', 4, 0),
+('A-102', 'Tower A', 1, 'Vacant (Unassigned)', 'Vacant', '', '1102', 0, 0),
 ('A-201', 'Tower A', 2, 'Meera Nambiar', 'Tenant', '+91 98222 33445', '1201', 2, 3500),
+('A-301', 'Tower A', 3, 'Vacant (Unassigned)', 'Vacant', '', '1301', 0, 0),
 ('A-302', 'Tower A', 3, 'Anand Kulkarni', 'Owner', '+91 98333 44556', '1302', 3, 0),
 ('A-402', 'Tower A', 4, 'Aditya Sharma', 'Owner', '+91 98201 44521', '1402', 3, 4200),
 ('A-501', 'Tower A', 5, 'Farhan Zaidi', 'Owner', '+91 98444 55667', '1501', 4, 0),
+('B-103', 'Tower B', 1, 'Vacant (Unassigned)', 'Vacant', '', '2103', 0, 0),
 ('B-204', 'Tower B', 2, 'Dr. Suresh Sen', 'Owner', '+91 98555 66778', '2204', 2, 0),
+('B-303', 'Tower B', 3, 'Vacant (Unassigned)', 'Vacant', '', '2303', 0, 0),
 ('B-502', 'Tower B', 5, 'Geeta Agarwal', 'Tenant', '+91 98666 77889', '2502', 3, 7000),
 ('B-801', 'Tower B', 8, 'Priya Mukherjee', 'Owner', '+91 98450 11982', '2801', 2, 0),
 ('C-104', 'Tower C', 1, 'Vikram Deshmukh', 'Owner', '+91 99302 88471', '3104', 5, 0),
+('C-202', 'Tower C', 2, 'Vacant (Unassigned)', 'Vacant', '', '3202', 0, 0),
 ('C-303', 'Tower C', 3, 'Kunal Malhotra', 'Owner', '+91 98777 88990', '3303', 3, 0),
+('C-501', 'Tower C', 5, 'Vacant (Unassigned)', 'Vacant', '', '3501', 0, 0),
 ('C-602', 'Tower C', 6, 'Tanvi Joshi', 'Tenant', '+91 98888 99001', '3602', 1, 1500),
+('D-102', 'Tower D', 1, 'Vacant (Unassigned)', 'Vacant', '', '4102', 0, 0),
 ('D-201', 'Tower D', 2, 'Rajinder Gill', 'Owner', '+91 98999 00112', '4201', 4, 0),
 ('D-404', 'Tower D', 4, 'Sanjay Reddy', 'Owner', '+91 99000 11223', '4404', 4, 8400),
 ('D-701', 'Tower D', 7, 'David Christopher', 'Owner', '+91 99111 22334', '4701', 2, 0)
